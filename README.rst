@@ -18,21 +18,6 @@ from PyPI::
 How to use
 ==========
 
-config file::
-
-  [app:main]
-
-  # your-config
-
-  boto3.sessions = mysession
-  boto3.session.mysession.core.config_file = /path/to/aws/config.ini
-  boto3.session.mysession.core.credentials_file = /path/to/aws/credentials.ini
-  boto3.session.mysession.core.profile = prof1
-  boto3.clients = filepot
-  boto3.client.filepot.session = mysession
-  boto3.client.filepot.service_name = s3
-
-
 In configuration phase, include ``pyramid_boto3`` after ``pyramid_services``::
 
   from pyramid.config import Configurator
@@ -54,6 +39,22 @@ In view or traversing, you can get predefined ``boto3``'s ``Client`` or
   def some_view(request):
       client = request.find_service(name='boto3.client.filepot')
       client.list_buckets()
+
+
+You need to define servie's name (ex/ ``'boto3.client.filepot'``) and
+arguments in your config file::
+
+  [app:main]
+
+  # your-config
+
+  boto3.sessions = mysession
+  boto3.session.mysession.core.config_file = /path/to/aws/config.ini
+  boto3.session.mysession.core.credentials_file = /path/to/aws/credentials.ini
+  boto3.session.mysession.core.profile = prof1
+  boto3.clients = filepot
+  boto3.client.filepot.session = mysession
+  boto3.client.filepot.service_name = s3
 
 
 Configuration Keys
