@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import boto3_paste
+import botocore.config
+from boto3.session import Session
+from botocore.session import Session as CoreSession
 from pyramid.config import aslist
 
 
@@ -56,6 +58,28 @@ def resource_factory(session_name, service_name, settings):
     return factory
 
 
+def session_factory(settings):
+    """
+    :type settings: dict
+    :rtype: boto3.Session
+    """
+    core_settings = lstrip_settings(settings, 'botocore.')
+    if core_settings:
+        settings = dict([(k, v) for k, v in settings.items()
+                         if not k.startswith('botocore.')])
+        core_session = CoreSession()
+        for k, v in CoreSession.SESSION_VARIABLES.items():
+            if k in core_settings:
+                var = core_settings[k]
+                (ini_key, env_key, default, converter) = v
+                if converter:
+                    var = converter(var)
+                core_session.set_config_variable(k, var)
+        settings['botocore_session'] = core_session
+    session = Session(**settings)
+    return session
+
+
 def configure(config, prefix='pyramid_boto3.'):
     """
     :type config: pyramid.config.Configurator
@@ -66,11 +90,10 @@ def configure(config, prefix='pyramid_boto3.'):
     session_map = {}
     for session_name in aslist(settings.get('sessions', '')):
         session_map[session_name] = fqsn = prefix + 'session.' + session_name
+        settings_local = lstrip_settings(settings,
+                                         'session.{}.'.format(session_name))
         config.register_service(
-            boto3_paste.session_from_config(
-                settings,
-                'session.{}.'.format(session_name),
-            ),
+            session_factory(settings_local),
             name=fqsn,
         )
 

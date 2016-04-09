@@ -36,12 +36,18 @@ class FunctionalTestCase(unittest.TestCase):
         d = os.path.dirname(__file__)
         config = Configurator(settings={
             'pyramid_boto3.sessions': 'prof1 prof2',
-            'pyramid_boto3.session.prof1.botocore.config_file': os.path.join(d, 'config_1.ini'),
-            'pyramid_boto3.session.prof1.botocore.credentials_file': os.path.join(d, 'credentials_1.ini'),
+            'pyramid_boto3.session.prof1.botocore.config_file':
+                os.path.join(d, 'config_1.ini'),
+            'pyramid_boto3.session.prof1.botocore.credentials_file':
+                os.path.join(d, 'credentials_1.ini'),
             'pyramid_boto3.session.prof1.botocore.profile': 'prof1',
-            'pyramid_boto3.session.prof2.botocore.config_file': os.path.join(d, 'config_1.ini'),
-            'pyramid_boto3.session.prof2.botocore.credentials_file': os.path.join(d, 'credentials_1.ini'),
+            'pyramid_boto3.session.prof2.botocore.config_file':
+                os.path.join(d, 'config_1.ini'),
+            'pyramid_boto3.session.prof2.botocore.credentials_file':
+                os.path.join(d, 'credentials_1.ini'),
             'pyramid_boto3.session.prof2.botocore.profile': 'prof2',
+            'pyramid_boto3.session.prof2.botocore.metadata_service_timeout':
+                '1',
             'pyramid_boto3.clients': 'filepot1',
             'pyramid_boto3.client.filepot1.session_name': 'prof1',
             'pyramid_boto3.client.filepot1.service_name': 's3',
@@ -55,10 +61,19 @@ class FunctionalTestCase(unittest.TestCase):
         env = prepare()
         request = env['request']
         s3_client = request.find_service(name='pyramid_boto3.client.filepot1')
-        self.assertEqual(s3_client._request_signer._credentials.access_key, '__PROF1_KEY__')
-        self.assertEqual(s3_client._request_signer._credentials.secret_key, '__PROF1_SECRET__')
+        self.assertEqual(s3_client._request_signer._credentials.access_key,
+                         '__PROF1_KEY__')
+        self.assertEqual(s3_client._request_signer._credentials.secret_key,
+                         '__PROF1_SECRET__')
         self.assertEqual(s3_client.meta.region_name, 'us-west-1')
-        s3_resource = request.find_service(name='pyramid_boto3.resource.filepot2')
-        self.assertEqual(s3_resource.meta.client._request_signer._credentials.access_key, '__PROF2_KEY__')
-        self.assertEqual(s3_resource.meta.client._request_signer._credentials.secret_key, '__PROF2_SECRET__')
-        self.assertEqual(s3_resource.meta.client.meta.region_name, 'ap-northeast-1')
+        s3_resource = request.find_service(
+            name='pyramid_boto3.resource.filepot2'
+        )
+        self.assertEqual(
+            s3_resource.meta.client._request_signer._credentials.access_key,
+            '__PROF2_KEY__')
+        self.assertEqual(
+            s3_resource.meta.client._request_signer._credentials.secret_key,
+            '__PROF2_SECRET__')
+        self.assertEqual(s3_resource.meta.client.meta.region_name,
+                         'ap-northeast-1')

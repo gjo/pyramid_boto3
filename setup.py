@@ -16,7 +16,8 @@ except:
 
 
 install_requires = [
-    'boto3_paste',
+    'boto3',
+    'botocore',
     'pyramid',
     'pyramid_services',
 ]
