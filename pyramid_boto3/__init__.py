@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import botocore.config
 from boto3.session import Session
+from botocore.config import Config
 from botocore.session import Session as CoreSession
-from pyramid.config import aslist
+from pyramid.settings import asbool, aslist
 
 
 __version__ = '0.1'
@@ -16,10 +16,36 @@ def lstrip_settings(settings, prefix):
     return ret
 
 
-def client_factory(session_name, service_name, settings):
+def config_factory(settings):
+    """
+    :type settings: dict
+    :rtype: botocore.config.Config
+    """
+    params = {}
+    for k in ('region_name', 'signature_version', 'user_agent',
+              'user_agent_extra'):
+        if settings.get(k):
+            params[k] = settings[k]
+    for k in ('connect_timeout', 'read_timeout'):
+        if settings.get(k):
+            params[k] = int(settings[k])
+    for k in ('parameter_validation',):
+        if settings.get(k):
+            params[k] = asbool(settings[k])
+    s3 = {}
+    for k in ('addressing_style',):
+        lk = 's3.{}'.format(k)
+        if settings.get(lk):
+            s3[k] = settings[lk]
+    if s3:
+        params['s3'] = s3
+    config = Config(**params)
+    return config
+
+
+def client_factory(session_name, settings):
     """
     :type session_name: str
-    :type service_name: str
     :type settings: dict
     :rtype: (object, pyramid.request.Request)->
                 boto3.resources.base.ResourceBase
@@ -31,13 +57,13 @@ def client_factory(session_name, service_name, settings):
         :rtype: botocore.client.BaseClient
         """
         session = request.find_service(name=session_name)
-        client = session.client(service_name, **settings)
+        client = session.client(**settings)
         return client
 
     return factory
 
 
-def resource_factory(session_name, service_name, settings):
+def resource_factory(session_name, settings):
     """
     :type session_name: str
     :type service_name: str
@@ -52,7 +78,7 @@ def resource_factory(session_name, service_name, settings):
         :rtype: boto3.resources.base.ResourceBase
         """
         session = request.find_service(name=session_name)
-        resource = session.resource(service_name, **settings)
+        resource = session.resource(**settings)
         return resource
 
     return factory
@@ -89,13 +115,16 @@ def configure(config, prefix='pyramid_boto3.'):
 
     session_map = {}
     for session_name in aslist(settings.get('sessions', '')):
-        session_map[session_name] = fqsn = prefix + 'session.' + session_name
+        qsn = 'session.{}'.format(session_name)
+        session_map[session_name] = fqsn = prefix + qsn
+        settings_local = lstrip_settings(settings, qsn + '.')
+        config.register_service(session_factory(settings_local), name=fqsn)
+
+    config_map = {}
+    for config_name in aslist(settings.get('configs', '')):
         settings_local = lstrip_settings(settings,
-                                         'session.{}.'.format(session_name))
-        config.register_service(
-            session_factory(settings_local),
-            name=fqsn,
-        )
+                                         'config.{}.'.format(config_name))
+        config_map[config_name] = config_factory(settings_local)
 
     for domain, domain_plural, factory in (
         ('client', 'clients', client_factory),
@@ -108,9 +137,11 @@ def configure(config, prefix='pyramid_boto3.'):
             )
             session_name = settings_local.pop('session_name')
             session_name = session_map[session_name]
-            service_name = settings_local.pop('service_name')
+            config_name = settings_local.pop('config_name', None)
+            if config_name:
+                settings_local['config'] = config_map[config_name]
             config.register_service_factory(
-                factory(session_name, service_name, settings_local),
+                factory(session_name, settings_local),
                 name=prefix + domain + '.' + name,
             )
 

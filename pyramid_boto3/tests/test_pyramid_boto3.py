@@ -48,12 +48,18 @@ class FunctionalTestCase(unittest.TestCase):
             'pyramid_boto3.session.prof2.botocore.profile': 'prof2',
             'pyramid_boto3.session.prof2.botocore.metadata_service_timeout':
                 '1',
+            'pyramid_boto3.configs': 'conf1',
+            'pyramid_boto3.config.conf1.user_agent': 'myua',
+            'pyramid_boto3.config.conf1.connect_timeout': '3',
+            'pyramid_boto3.config.conf1.parameter_validation': 'no',
+            'pyramid_boto3.config.conf1.s3.addressing_style': 'path',
             'pyramid_boto3.clients': 'filepot1',
             'pyramid_boto3.client.filepot1.session_name': 'prof1',
             'pyramid_boto3.client.filepot1.service_name': 's3',
             'pyramid_boto3.resources': 'filepot2',
             'pyramid_boto3.resource.filepot2.session_name': 'prof2',
             'pyramid_boto3.resource.filepot2.service_name': 's3',
+            'pyramid_boto3.resource.filepot2.config_name': 'conf1',
         })
         config.include('pyramid_services')
         config.include('pyramid_boto3')
