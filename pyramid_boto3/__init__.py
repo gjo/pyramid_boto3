@@ -89,10 +89,10 @@ def session_factory(settings):
     :type settings: dict
     :rtype: boto3.Session
     """
-    core_settings = lstrip_settings(settings, 'botocore.')
+    core_settings = lstrip_settings(settings, 'core.')
     if core_settings:
         settings = dict([(k, v) for k, v in settings.items()
-                         if not k.startswith('botocore.')])
+                         if not k.startswith('core.')])
         core_session = CoreSession()
         for k, v in CoreSession.SESSION_VARIABLES.items():
             if k in core_settings:
@@ -106,7 +106,7 @@ def session_factory(settings):
     return session
 
 
-def configure(config, prefix='pyramid_boto3.'):
+def configure(config, prefix='boto3.'):
     """
     :type config: pyramid.config.Configurator
     :type prefix: str
@@ -135,9 +135,9 @@ def configure(config, prefix='pyramid_boto3.'):
                 settings,
                 '{}.{}.'.format(domain, name),
             )
-            session_name = settings_local.pop('session_name')
+            session_name = settings_local.pop('session')
             session_name = session_map[session_name]
-            config_name = settings_local.pop('config_name', None)
+            config_name = settings_local.pop('config', None)
             if config_name:
                 settings_local['config'] = config_map[config_name]
             config.register_service_factory(
