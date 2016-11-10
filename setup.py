@@ -20,6 +20,9 @@ install_requires = [
     'botocore',
     'pyramid',
     'pyramid_services',
+    'pyramid_tm',
+    'transaction',
+    'zope.interface',
 ]
 
 

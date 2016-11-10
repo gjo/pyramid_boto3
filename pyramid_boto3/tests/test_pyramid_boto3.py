@@ -1,13 +1,44 @@
 # -*- coding: utf-8 -*-
 
+import os
 import unittest
+from boto3.session import Session
+from pyramid.config import Configurator
+from pyramid.scripting import prepare
+from transaction.interfaces import IDataManagerSavepoint, ISavepointDataManager
+from zope.interface.verify import verifyObject
+
+
+_marker = object()
+
+
+class Boto3DataManagerTestCase(unittest.TestCase):
+
+    def test_interface(self):
+        from .. import Boto3DataManager
+        obj = Boto3DataManager(_marker)
+        verifyObject(ISavepointDataManager, obj)
+        self.assertIs(obj.transaction_manager, _marker)
+
+
+class Boto3DataManagerSavepointTestCase(unittest.TestCase):
+
+    def test_interface(self):
+        from .. import Boto3DataManagerSavepoint
+        obj = Boto3DataManagerSavepoint(_marker)
+        verifyObject(IDataManagerSavepoint, obj)
+        self.assertIs(obj.data_manager, _marker)
+
+    def test_rollback(self):
+        from .. import Boto3DataManagerSavepoint
+        obj = Boto3DataManagerSavepoint(_marker)
+        obj.rollback()
+        self.assertTrue(True)
 
 
 class FunctionalTestCase(unittest.TestCase):
 
     def test_empty(self):
-        from pyramid.config import Configurator
-        from pyramid.scripting import prepare
         config = Configurator(settings={})
         config.include('pyramid_services')
         config.include('pyramid_boto3')
@@ -15,9 +46,6 @@ class FunctionalTestCase(unittest.TestCase):
         env = prepare()
 
     def test_session(self):
-        from boto3.session import Session
-        from pyramid.config import Configurator
-        from pyramid.scripting import prepare
         config = Configurator(settings={
             'boto3.sessions': 'default',
         })
@@ -30,9 +58,6 @@ class FunctionalTestCase(unittest.TestCase):
         self.assertIsInstance(session, Session)
 
     def test_fat(self):
-        import os
-        from pyramid.config import Configurator
-        from pyramid.scripting import prepare
         d = os.path.dirname(__file__)
         config = Configurator(settings={
             'boto3.sessions': 'prof1 prof2',
