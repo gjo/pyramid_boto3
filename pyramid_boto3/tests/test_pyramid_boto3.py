@@ -1,38 +1,44 @@
 # -*- coding: utf-8 -*-
 
+import os
 import unittest
+from boto3.session import Session
+from pyramid.config import Configurator
+from pyramid.request import Request
 
 
 class FunctionalTestCase(unittest.TestCase):
 
     def test_empty(self):
-        from pyramid.config import Configurator
-        from pyramid.scripting import prepare
         config = Configurator(settings={})
         config.include('pyramid_services')
         config.include('pyramid_boto3')
         app = config.make_wsgi_app()
-        env = prepare()
+        del app
 
     def test_session(self):
-        from boto3.session import Session
-        from pyramid.config import Configurator
-        from pyramid.scripting import prepare
         config = Configurator(settings={
             'boto3.sessions': 'default',
         })
         config.include('pyramid_services')
         config.include('pyramid_boto3')
+
+        v = {'session': None}
+
+        def aview(request):
+            v['session'] = request.find_service(name='boto3.session.default')
+            return 'OK'
+
+        config.add_view(aview, route_name='root', renderer='json')
+        config.add_route('root', pattern='/')
         app = config.make_wsgi_app()
-        env = prepare()
-        request = env['request']
-        session = request.find_service(name='boto3.session.default')
-        self.assertIsInstance(session, Session)
+        request = Request.blank('/')
+        response = request.get_response(app)
+        self.assertEqual(response.json_body, 'OK')
+        self.assertIsInstance(v['session'], Session)
+        del app
 
     def test_fat(self):
-        import os
-        from pyramid.config import Configurator
-        from pyramid.scripting import prepare
         d = os.path.dirname(__file__)
         config = Configurator(settings={
             'boto3.sessions': 'prof1 prof2',
@@ -62,16 +68,28 @@ class FunctionalTestCase(unittest.TestCase):
         })
         config.include('pyramid_services')
         config.include('pyramid_boto3')
+
+        v = {'s3_client': None, 's3_resource': None}
+
+        def aview(request):
+            v['s3_client'] = request.find_service(name='boto3.client.filepot1')
+            v['s3_resource'] = \
+                request.find_service(name='boto3.resource.filepot2')
+            return 'OK'
+
+        config.add_view(aview, route_name='root', renderer='json')
+        config.add_route('root', pattern='/')
         app = config.make_wsgi_app()
-        env = prepare()
-        request = env['request']
-        s3_client = request.find_service(name='boto3.client.filepot1')
+        request = Request.blank('/')
+        response = request.get_response(app)
+        self.assertEqual(response.json_body, 'OK')
+        s3_client = v['s3_client']
+        s3_resource = v['s3_resource']
         self.assertEqual(s3_client._request_signer._credentials.access_key,
                          '__PROF1_KEY__')
         self.assertEqual(s3_client._request_signer._credentials.secret_key,
                          '__PROF1_SECRET__')
         self.assertEqual(s3_client.meta.region_name, 'us-west-1')
-        s3_resource = request.find_service(name='boto3.resource.filepot2')
         self.assertEqual(
             s3_resource.meta.client._request_signer._credentials.access_key,
             '__PROF2_KEY__')
@@ -80,3 +98,4 @@ class FunctionalTestCase(unittest.TestCase):
             '__PROF2_SECRET__')
         self.assertEqual(s3_resource.meta.client.meta.region_name,
                          'ap-northeast-1')
+        del app
