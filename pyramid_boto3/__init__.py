@@ -87,23 +87,33 @@ def resource_factory(session_name, settings):
 def session_factory(settings):
     """
     :type settings: dict
-    :rtype: boto3.Session
+    :rtype: (object, pyramid.request.Request)-> boto3.Session
     """
     core_settings = lstrip_settings(settings, 'core.')
     if core_settings:
         settings = dict([(k, v) for k, v in settings.items()
                          if not k.startswith('core.')])
-        core_session = CoreSession()
-        for k, v in CoreSession.SESSION_VARIABLES.items():
-            if k in core_settings:
-                var = core_settings[k]
-                (ini_key, env_key, default, converter) = v
-                if converter:
-                    var = converter(var)
-                core_session.set_config_variable(k, var)
-        settings['botocore_session'] = core_session
-    session = Session(**settings)
-    return session
+
+    def factory(context, request):
+        """
+        :type context: object
+        :type request: pyramid.request.Request
+        :rtype: boto3.Session
+        """
+        core_session = None
+        if core_settings:
+            core_session = CoreSession()
+            for k, v in CoreSession.SESSION_VARIABLES.items():
+                if k in core_settings:
+                    var = core_settings[k]
+                    (ini_key, env_key, default, converter) = v
+                    if converter:
+                        var = converter(var)
+                    core_session.set_config_variable(k, var)
+        session = Session(botocore_session=core_session, **settings)
+        return session
+
+    return factory
 
 
 def configure(config, prefix='boto3.'):
@@ -118,7 +128,10 @@ def configure(config, prefix='boto3.'):
         qsn = 'session.{}'.format(session_name)
         session_map[session_name] = fqsn = prefix + qsn
         settings_local = lstrip_settings(settings, qsn + '.')
-        config.register_service(session_factory(settings_local), name=fqsn)
+        config.register_service_factory(
+            session_factory(settings_local),
+            name=fqsn,
+        )
 
     config_map = {}
     for config_name in aslist(settings.get('configs', '')):

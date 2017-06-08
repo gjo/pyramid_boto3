@@ -3,6 +3,7 @@ Change History
 
 0.2 - Unreleased
 ----------------
+- ``botocore.session.Session.create_client`` does not support threading. See: boto/botocore#1033
 - tox support.
 - universal wheel support.
 
