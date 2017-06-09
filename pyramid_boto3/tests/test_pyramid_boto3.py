@@ -16,7 +16,7 @@ class FunctionalTestCase(unittest.TestCase):
         app = config.make_wsgi_app()
         del app
 
-    def test_session(self):
+    def test_thin(self):
         config = Configurator(settings={
             'boto3.sessions': 'default',
         })
@@ -99,3 +99,41 @@ class FunctionalTestCase(unittest.TestCase):
         self.assertEqual(s3_resource.meta.client.meta.region_name,
                          'ap-northeast-1')
         del app
+
+    def assert_cache_enabled(self, cache_factory):
+        settings = {
+            'boto3.sessions': 'default',
+            'boto3.clients': 's3',
+            'boto3.client.s3.session': 'default',
+            'boto3.client.s3.service_name': 's3',
+            'boto3.resources': 's3',
+            'boto3.resource.s3.session': 'default',
+            'boto3.resource.s3.service_name': 's3',
+            'boto3.cache_factory': cache_factory,
+        }
+        config = Configurator(settings=settings)
+        config.include('pyramid_services')
+        config.include('pyramid_boto3')
+
+        def aview(request):
+            session = request.find_service(name='boto3.session.default')
+            s3cli = request.find_service(name='boto3.client.s3')
+            s3res = request.find_service(name='boto3.resource.s3')
+            return 'OK'
+
+        config.add_view(aview, route_name='root', renderer='json')
+        config.add_route('root', pattern='/')
+        app = config.make_wsgi_app()
+        request = Request.blank('/')
+        response = request.get_response(app)
+        self.assertEqual(response.json_body, 'OK')
+        del app
+
+    def test_cache_disabled(self):
+        self.assert_cache_enabled('')
+
+    def test_cache_threading_local(self):
+        self.assert_cache_enabled('threading.local')
+
+    # def test_cache_gevent_local_local(self):
+    #     self.assert_cache_enabled('gevent.local.local')

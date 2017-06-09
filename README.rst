@@ -48,6 +48,7 @@ arguments in your config file::
 
   # your-config
 
+  boto3.cache_factory = threading.local
   boto3.sessions = mysession
   boto3.session.mysession.core.config_file = /path/to/aws/config.ini
   boto3.session.mysession.core.credentials_file = /path/to/aws/credentials.ini
@@ -62,6 +63,10 @@ Configuration Keys
 
 +-----------------------------+-----------------------------------------------+
 | boto3.                      | namespace prefix                              |
++-----------------------------+-----------------------------------------------+
+| boto3.cache_factory         | full qualified callable name.                 |
+|                             | default is ``threading.local``.               |
+|                             | if you would like to disable, set blank       |
 +-----------------------------+-----------------------------------------------+
 | boto3.sessions              | list of session's names                       |
 +-----------------------------+-----------------------------------------------+
