@@ -1,6 +1,10 @@
 Change History
 ==============
 
+0.2.1 - 2017-06-14
+------------------
+- fixes resource cache
+
 0.2 - 2017-06-14
 ----------------
 - ``botocore.session.Session.create_client`` does not support threading. See: boto/botocore#1033

@@ -6,7 +6,7 @@ from botocore.session import Session as CoreSession
 from pyramid.settings import asbool, aslist
 
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 
 default_settings = {
@@ -95,7 +95,7 @@ def resource_factory(session_name, resource_name, settings, cache=None):
         """
         resource = None
         if cache is not None:
-            resource = setattr(cache, resource_name, None)
+            resource = getattr(cache, resource_name, None)
         if resource is None:
             session = request.find_service(name=session_name)
             resource = session.resource(**settings)
