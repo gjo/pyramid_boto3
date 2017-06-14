@@ -6,7 +6,7 @@ from botocore.session import Session as CoreSession
 from pyramid.settings import asbool, aslist
 
 
-__version__ = '0.2.dev1'
+__version__ = '0.2'
 
 
 default_settings = {
