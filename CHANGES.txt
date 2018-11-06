@@ -1,7 +1,7 @@
 Change History
 ==============
 
-0.3 - Unreleased
+0.3 - 2018-11-06
 ----------------
 - fixes imcompatibilities with botocore-1.12.38 later (#1)
 - include pre-requirements (``pyramid_services``)

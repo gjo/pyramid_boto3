@@ -20,7 +20,7 @@ install_requires = ["boto3", "botocore", "pyramid"]
 
 setup(
     name="pyramid_boto3",
-    version="0.3.dev1",
+    version="0.3",
     description=description,
     long_description=long_description,
     author="OCHIAI, Gouji",
