@@ -5,6 +5,7 @@ Change History
 ----------------
 - fixes imcompatibilities with botocore-1.12.38 later (#1)
 - drop python-3.3 support, add python-3.7 support
+- blackify
 
 0.2.1 - 2017-06-14
 ------------------
