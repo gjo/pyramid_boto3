@@ -1,6 +1,11 @@
-include README.rst
+include .coveragerc
+include .flake8
+include .gitignore
 include CHANGES.txt
 include LICENSE.txt
-include MANIFEST.in
-include .gitignore
-include pyramid_boto3/tests/*.ini
+include README.rst
+include example.ini
+include pyproject.toml
+include tox.ini
+include tests/*.ini
+include tests/*.py

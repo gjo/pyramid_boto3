@@ -24,7 +24,6 @@ In configuration phase, include ``pyramid_boto3`` after ``pyramid_services``::
 
   def main(global_config, **settings):
       config = Configurator(settings=settings)
-      config.include('pyramid_services')
       config.include('pyramid_boto3')
 
       # Your configuration
