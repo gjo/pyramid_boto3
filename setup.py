@@ -11,7 +11,7 @@ try:
     readme = open(os.path.join(here, "README.rst")).read()
     changes = open(os.path.join(here, "CHANGES.txt")).read()
     long_description = "\n\n".join([readme, changes])
-except:
+except OSError:
     long_description = description
 
 

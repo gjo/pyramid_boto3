@@ -127,8 +127,11 @@ class FunctionalTestCase(unittest.TestCase):
 
         def aview(request):
             session = request.find_service(name="boto3.session.default")
+            self.assertIsNotNone(session)
             s3cli = request.find_service(name="boto3.client.s3")
+            self.assertIsNotNone(s3cli)
             s3res = request.find_service(name="boto3.resource.s3")
+            self.assertIsNotNone(s3res)
             return "OK"
 
         config.add_view(aview, route_name="root", renderer="json")
