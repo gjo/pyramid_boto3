@@ -29,7 +29,7 @@ tests_require = [
 
 setup(
     name='pyramid_boto3',
-    version='0.3.dev0',
+    version='0.3.dev1',
     description=description,
     long_description=long_description,
     author='OCHIAI, Gouji',

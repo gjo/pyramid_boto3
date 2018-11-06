@@ -6,7 +6,7 @@ from botocore.session import Session as CoreSession
 from pyramid.settings import asbool, aslist
 
 
-__version__ = '0.3.dev0'
+__version__ = '0.3.dev1'
 
 
 default_settings = {
@@ -117,6 +117,9 @@ def session_factory(session_name, settings, cache=None):
     if core_settings:
         settings = dict([(k, v) for k, v in settings.items()
                          if not k.startswith('core.')])
+    for k in ('metadata_service_timeout', 'metadata_service_num_attempts'):
+        if k in core_settings:
+            core_settings[k] = int(core_settings[k])
 
     def factory(context, request):
         """
@@ -131,13 +134,8 @@ def session_factory(session_name, settings, cache=None):
             core_session = None
             if core_settings:
                 core_session = CoreSession()
-                for k, v in CoreSession.SESSION_VARIABLES.items():
-                    if k in core_settings:
-                        var = core_settings[k]
-                        (ini_key, env_key, default, converter) = v
-                        if converter:
-                            var = converter(var)
-                        core_session.set_config_variable(k, var)
+                for k, v in core_settings.items():
+                    core_session.set_config_variable(k, v)
             session = Session(botocore_session=core_session, **settings)
             if cache is not None:
                 setattr(cache, session_name, session)
