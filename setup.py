@@ -19,11 +19,6 @@ install_requires = [
     'boto3',
     'botocore',
     'pyramid',
-    'pyramid_services<2.0',  # for python2.7
-]
-
-
-tests_require = [
 ]
 
 
@@ -41,9 +36,9 @@ setup(
     zip_safe=False,
     install_requires=install_requires,
     test_suite='pyramid_boto3',
-    tests_require=tests_require,
     extras_require={
-        'testing': tests_require,
+        ':python_version<"3.4"': ['pyramid_services<2.0'],
+        ':python_version>="3.4"': ['pyramid_services'],
     },
     classifiers=[
         'Framework :: Pyramid',
@@ -53,5 +48,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )
