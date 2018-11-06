@@ -27,11 +27,10 @@ setup(
     author_email="gjo.ext@gmail.com",
     url="https://github.com/gjo/pyramid_boto3",
     license="BSD",
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
-    test_suite="pyramid_boto3",
     extras_require={
         ':python_version<"3.4"': ["pyramid_services<2.0"],
         ':python_version>="3.4"': ["pyramid_services"],

@@ -1,0 +1,4 @@
+[run]
+source =
+  pyramid_boto3
+  tests
