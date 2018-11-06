@@ -161,6 +161,8 @@ def configure(config, prefix="boto3."):
     :type config: pyramid.config.Configurator
     :type prefix: str
     """
+    config.include("pyramid_services")
+
     settings = default_settings.copy()
     settings.update(lstrip_settings(config.get_settings(), prefix))
 

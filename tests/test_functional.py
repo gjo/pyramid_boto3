@@ -10,14 +10,12 @@ from pyramid.request import Request
 class FunctionalTestCase(unittest.TestCase):
     def test_empty(self):
         config = Configurator(settings={})
-        config.include("pyramid_services")
         config.include("pyramid_boto3")
         app = config.make_wsgi_app()
         del app
 
     def test_thin(self):
         config = Configurator(settings={"boto3.sessions": "default"})
-        config.include("pyramid_services")
         config.include("pyramid_boto3")
 
         v = {"session": None}
@@ -69,7 +67,6 @@ class FunctionalTestCase(unittest.TestCase):
                 "boto3.resource.filepot2.config": "conf1",
             }
         )
-        config.include("pyramid_services")
         config.include("pyramid_boto3")
 
         v = {"s3_client": None, "s3_resource": None}
@@ -122,7 +119,6 @@ class FunctionalTestCase(unittest.TestCase):
             "boto3.cache_factory": cache_factory,
         }
         config = Configurator(settings=settings)
-        config.include("pyramid_services")
         config.include("pyramid_boto3")
 
         def aview(request):
