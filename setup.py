@@ -19,7 +19,7 @@ install_requires = [
     'boto3',
     'botocore',
     'pyramid',
-    'pyramid_services',
+    'pyramid_services<2.0',  # for python2.7
 ]
 
 
@@ -50,7 +50,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
